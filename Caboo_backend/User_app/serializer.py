@@ -17,11 +17,12 @@ class ImageUploadSerializer(serializers.Serializer):
         raise serializers.ValidationError("User not found")
     
 class UserSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model=CustomUser
         fields=['username', 'email', 'phone', 'profile','id','ride','wallet']
         read_only_fields = ['id']
+    
+ 
         
 class TripSerializer(serializers.ModelSerializer):
     dateTime = serializers.SerializerMethodField()

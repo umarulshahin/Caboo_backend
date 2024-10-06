@@ -151,7 +151,7 @@ AUTH_USER_MODEL = 'Authentication_app.CustomUser'
 CORS_ALLOW_ALL_ORIGINS = True 
 
 # CORS configuration
-CORS_ORIGIN_WHITELIST =['https://cabooserver.online', 'http://cabooserver.online' , 'http://localhost:5174' , 'http://localhost:5173']
+CORS_ORIGIN_WHITELIST =['https://caboo.site' , 'http://localhost:5174' , 'http://localhost:5173']
 CORS_ALLOW_METHODS = ['GET', 'POST', 'PATCH', 'DELETE']
 CORS_ALLOW_HEADERS = ['Authorization', 'Content-Type']
 
