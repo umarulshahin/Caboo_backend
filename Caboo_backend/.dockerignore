@@ -1,0 +1,17 @@
+
+*.pyc
+__pycache__
+.git
+.gitignore
+.pytest_cache
+*.sqlite3
+media/*
+staticfiles/*
+celerybeat-schedule
+celerybeat.pid
+.coverage
+htmlcov/
+.DS_Store
+node_modules/
+venv/
+myenv/
