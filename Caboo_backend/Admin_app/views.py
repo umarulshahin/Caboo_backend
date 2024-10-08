@@ -17,7 +17,8 @@ from User_app.serializer import *
 from rest_framework.permissions import BasePermission
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.exceptions import PermissionDenied, AuthenticationFailed
-
+from rest_framework.pagination import PageNumberPagination
+from django.core.paginator import Paginator
 class RoleBasedPermission(BasePermission):
 
 
@@ -155,12 +156,35 @@ def Driver_management(request):
 def Get_AllTrips(request):
     
     try:
-        print('all trip working')
+        page_number = request.GET.get('page',1)
         trips = TripDetails.objects.all().order_by('-id')
-        print(trips,'trips all')
-        if trips:
+        page_size = 2
+        print(page_number,'page number')
+        print(trips,'trips')
+        if trips and page_number != 'all':
+            
+            try:
+                
+               paginator = Paginator(trips,page_size)
+               page = paginator.page(page_number)
+               serializer = AllRidesSerializer(page,many=True)
+               return Response({ "trips_data":serializer.data,
+                              'total_pages': paginator.num_pages,
+                              'current_page': page_number,
+                              'total_items': paginator.count
+                                })
+               
+            except Exception as e: 
+                return Response({"detail": "Page not found."}, status=404)
+            
+        elif(trips and page_number == 'all'):
+            
             serializer = AllRidesSerializer(trips,many=True)
             return Response(serializer.data)
+
+        
+       
+        
     except Exception as e:
         return Response(f"error {e}")
     

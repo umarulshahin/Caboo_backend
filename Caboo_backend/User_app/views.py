@@ -12,7 +12,6 @@ from django.db.models import *
 from Driver_app.serializer import *
 from rest_framework.pagination import PageNumberPagination
 from django.core.paginator import Paginator
-# from django.http import JsonResponse
 
         
 @api_view(["PATCH"])
@@ -150,7 +149,7 @@ def Walletdetails(request):
         
         user_id = request.GET.get('id')  
         page_number = request.GET.get('page',1)
-        print(page_number,'page number')
+        
         page_size = 5
         data=UserWallet.objects.filter(customuser=user_id).order_by('-id')
         if data:
