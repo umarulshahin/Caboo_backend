@@ -18,3 +18,5 @@ requests
 requests-oauthlib
 python-decouple
 social-auth-app-django
+whitenoise
+
