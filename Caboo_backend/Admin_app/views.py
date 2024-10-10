@@ -181,12 +181,18 @@ def Get_AllTrips(request):
             
             serializer = AllRidesSerializer(trips,many=True)
             return Response(serializer.data)
-
-        
-       
         
     except Exception as e:
         return Response(f"error {e}")
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated,RoleBasedPermission])
+def Coupon_Management(request):
+    
+    data = request.data
+    
+    print(data,'coupon data')
+    return Response("coupon created successfully")
     
     
     
