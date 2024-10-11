@@ -203,21 +203,29 @@ def Coupon_Management(request):
             'status':data.get('isActive')
                 }  
             
-            print(coupon_data,'coupon data')
             serializer = CouponSerializer(data=coupon_data)
             if serializer.is_valid():
                 serializer.save()
                 return Response({"coupon created successfully"},status=status.HTTP_201_CREATED)
             else:
-                print(serializer.errors,'error ')
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
-            print(f"error coupon {e}")
             return Response ({'error': str(e)},status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response({'error':'data not fount'},status=status.HTTP_404_NOT_FOUND)
     
+@api_view(['GET'])
+@permission_classes([IsAuthenticated,RoleBasedPermission])
+def Get_Coupon(request):
     
-    
+    try:
+        
+        coupons = Coupons.objects.all()
+        print(coupons,'couponds')
+        serializer = CouponSerializer(coupons,many=True)
+        print(serializer.data,'coupon data')
+        return Response({'data':serializer.data})
+    except Exception as e:
+        return Response("somthing is wrong ",status=status.HTTP_400_BAD_REQUEST)
     

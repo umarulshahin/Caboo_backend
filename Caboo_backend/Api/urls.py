@@ -42,6 +42,7 @@ urlpatterns = [
   path('Drivermanagement/',Driver_management,name="Drivermanagment"),
   path('getalltrip/',Get_AllTrips,name='getalltrip'),
   path('couponManagement/',Coupon_Management,name='couponManagement'),
+  path('getcoupon/',Get_Coupon,name='getcoupon'),
   
     #*.....................Driver Api .........................
     
