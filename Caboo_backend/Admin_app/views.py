@@ -159,8 +159,7 @@ def Get_AllTrips(request):
         page_number = request.GET.get('page',1)
         trips = TripDetails.objects.all().order_by('-id')
         page_size = 2
-        print(page_number,'page number')
-        print(trips,'trips')
+      
         if trips and page_number != 'all':
             
             try:
@@ -189,10 +188,35 @@ def Get_AllTrips(request):
 @permission_classes([IsAuthenticated,RoleBasedPermission])
 def Coupon_Management(request):
     
-    data = request.data
     
-    print(data,'coupon data')
-    return Response("coupon created successfully")
+    data = request.data
+    if data:
+        try:
+            coupon_data={
+            'code':data.get('couponCode'),
+            'type':data.get('couponType'),
+            'discount':data.get('discount'),
+            'max_amount':data.get('maxAmount'),
+            'image':data.get('image'),
+            'start_date':data.get('startDate'),
+            'end_date':data.get('expireDate'),
+            'status':data.get('isActive')
+                }  
+            
+            print(coupon_data,'coupon data')
+            serializer = CouponSerializer(data=coupon_data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"coupon created successfully"},status=status.HTTP_201_CREATED)
+            else:
+                print(serializer.errors,'error ')
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            print(f"error coupon {e}")
+            return Response ({'error': str(e)},status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({'error':'data not fount'},status=status.HTTP_404_NOT_FOUND)
     
     
     
