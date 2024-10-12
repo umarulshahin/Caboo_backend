@@ -35,8 +35,8 @@ class CouponSerializer(serializers.ModelSerializer):
     
     class Meta:
         model=Coupons
-        fields=['code', 'type', 'discount', 'max_amount', 'image', 'created_at', 'start_date', 'end_date', 'status']
-        read_only_fields = ['created_at'] 
+        fields=['id', 'code', 'type', 'discount', 'max_amount', 'image', 'created_at', 'start_date', 'end_date', 'status']
+        read_only_fields = ['created_at','id'] 
 
     def validate(self, obj):
          
@@ -49,7 +49,7 @@ class CouponSerializer(serializers.ModelSerializer):
         if isinstance(expire_date, datetime):
             expire_date = expire_date.date()
             
-        if obj['discount'] >=50:
+        if obj['discount'] >50:
             raise serializers.ValidationError('Discount cannot be more than 50%.')
         elif start_date < today:
             raise serializers.ValidationError("Start date must be today or a future date")
@@ -58,8 +58,7 @@ class CouponSerializer(serializers.ModelSerializer):
         
         return obj
     def create(self, validated_data):
-        print(validated_data,'validate data')
-        print(validated_data.get('image'),'image')
+       
         coupons=Coupons.objects.create(
             
             code=validated_data['code'],

@@ -222,10 +222,46 @@ def Get_Coupon(request):
     try:
         
         coupons = Coupons.objects.all()
-        print(coupons,'couponds')
         serializer = CouponSerializer(coupons,many=True)
-        print(serializer.data,'coupon data')
-        return Response({'data':serializer.data})
+        return Response(serializer.data)
     except Exception as e:
-        return Response("somthing is wrong ",status=status.HTTP_400_BAD_REQUEST)
+        return Response(f"somthing is wrong {e}",status=status.HTTP_400_BAD_REQUEST)
     
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated,RoleBasedPermission])
+def Update_Coupon(request):
+    
+    data = request.data
+    if data :
+        
+        try:
+            id = data.get('id')
+            coupon_data={
+            'code':data.get('couponCode'),
+            'type':data.get('couponType'),
+            'discount':data.get('discount'),
+            'max_amount':data.get('maxAmount'),
+            'start_date':data.get('startDate'),
+            'end_date':data.get('expireDate'),
+            'status':data.get('isActive')
+                }  
+            
+            if data.get('image'):
+                coupon_data['image']=data.get('image')
+                
+            print(id)
+            print(coupon_data)
+            coupon = Coupons.objects.filter(id=id).first()
+            if coupon:
+               serializer=CouponSerializer(coupon ,data=coupon_data,partial=True)
+               if serializer.is_valid():
+                   serializer.save()
+                   return Response("Coupon updated successfully", status=status.HTTP_200_OK)
+               else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response("Coupon id mismatch",status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response(f"error {e}")
+    else:
+        return Response("error data not found",status=status.HTTP_404_NOT_FOUND)

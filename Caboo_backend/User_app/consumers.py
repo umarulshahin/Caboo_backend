@@ -8,6 +8,7 @@ import random
 import asyncio
 from django.db.models import *
 import traceback
+from django.utils import timezone
 
 class LocationConsumer(AsyncJsonWebsocketConsumer):
     user_data = {}
@@ -107,9 +108,10 @@ class LocationConsumer(AsyncJsonWebsocketConsumer):
        
     
     @sync_to_async
-    def Trip_update(self,data,trip_id):
+    def Trip_update(self,data,trip_id,coupon_id=0):
         from .serializer import TripSerializer
-        from .models import TripDetails
+        from .models import TripDetails,UsedCoupons
+        
         print(data,'trip updation is working')
         try:
         
@@ -128,6 +130,9 @@ class LocationConsumer(AsyncJsonWebsocketConsumer):
             serializer = TripSerializer(trip,data=update_data,partial=True)
             if serializer.is_valid():
                 serializer.save()
+                if coupon_id:
+                   print(serializer.data['user'],'user id')
+                #    UsedCoupons.objects.create(User_id=serializer.data['user'],Coupon_id=coupon_id)
                 
                 return "successfully update"
 
@@ -297,6 +302,31 @@ class LocationConsumer(AsyncJsonWebsocketConsumer):
     #     except Exception as e :
          
     #      print(f"current ride check error {e}")
+    @sync_to_async 
+    def get_coupons(self,user_id):
+        Coupons = apps.get_model('Admin_app', 'Coupons','UsedCoupons')
+        UsedCoupons = apps.get_model('User_app', 'UsedCoupons')
+        from Admin_app.serializer import CouponSerializer
+
+        
+        try:
+            today = timezone.now().date()
+            available_coupons = Coupons.objects.filter(
+            status=True,
+            end_date__gte=today
+            ).exclude(
+                usedcoupons__User_id=user_id  
+            )
+
+            print(available_coupons, 'available coupons')
+            if available_coupons:
+               serializer = CouponSerializer(available_coupons,many=True)
+            return serializer.data
+            
+        except Exception as e:
+            
+           print(f"error get coupon {e}")
+    
     
     async def connect(self):
         
@@ -505,6 +535,9 @@ class LocationConsumer(AsyncJsonWebsocketConsumer):
                 
                 result = await self.Trip_update("completed",data['trip_id'])
                 trip_data = await self.get_tripdata(data['trip_id'])
+                print(trip_data,'trip completed')
+                coupons = await self.get_coupons(trip_data['user_id'])
+                
                 if result == 'successfully update' and trip_data:
 
                     await self.channel_layer.group_send(
@@ -512,7 +545,7 @@ class LocationConsumer(AsyncJsonWebsocketConsumer):
                             {
                                 'type': 'SuccessNotification',
                                 'status': 'Trip complete',
-                                'message': 'Trip complete succesfully.',
+                                'message': coupons,
                             }
                         )
                 
@@ -521,6 +554,7 @@ class LocationConsumer(AsyncJsonWebsocketConsumer):
                     trip_data = await self.get_tripdata(data['userRequest']['trip_id'])
 
                     if data['userRequest']['payment_type']=='cashinhand' and trip_data:
+                        print(data,'cash in hand ')
                         await self.channel_layer.group_send(
                         f"driver_{trip_data['driver_id']}",
                         {
@@ -601,8 +635,12 @@ class LocationConsumer(AsyncJsonWebsocketConsumer):
                         print('payment reach user side error')
                         
             elif 'payment received' in data:
-                
-                result = await self.Trip_update({'payment_type' : data['payment received'],'status': 'completed'},data['trip_id'])
+                print(data,'payment recevid')
+                coupon_id=0
+                if 'applyoffer' in data:
+                    coupon_id =data['applyoffer']['id']
+                    print(coupon_id,'coupon_id')
+                result = await self.Trip_update({'payment_type' : data['payment received'],'status': 'completed'},data['trip_id'],coupon_id)
                 trip_data = await self.get_tripdata(data['trip_id'])
                 if result == 'successfully update' and trip_data:
                     data = {

@@ -3,6 +3,7 @@ from Authentication_app.models import *
 import random
 import string
 from django.utils import timezone
+from Admin_app.models import *
 
 
 class DriverLocation(models.Model):
@@ -50,3 +51,10 @@ class UserWallet(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     reason = models.CharField(max_length=250,null=True,blank=True)
     status = models.CharField(max_length=50,blank=False,null=False)
+    
+    
+class UsedCoupons(models.Model):
+    
+    User_id = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    Coupon_id = models.ForeignKey(Coupons,on_delete=models.CASCADE)
+    used_at = models.DateTimeField(default=timezone.now)
